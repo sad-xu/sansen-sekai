@@ -1,0 +1,30 @@
+{
+  "name": "sansen-sekai",
+  "version": "1.0.0",
+  "description": "学无止境",
+  "keywords": [
+    "front-end",
+    "js",
+    "study"
+  ],
+  "main": "index.js",
+  "dependencies": {
+    "vuepress": "^1.0.3"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "dev": "vuepress dev docs",
+    "build": "vuepress build docs",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": {
+    "name": "sad-xu",
+    "email": "1031568754@qq.com",
+    "url": "https://github.com/sad-xu"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sad-xu/sansen-sekai.git"
+  },
+  "license": "ISC"
+}
