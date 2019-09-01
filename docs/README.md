@@ -2,7 +2,7 @@
 home: true
 heroImage: /sad-me.jpg
 actionText: 开始阅读
-actionLink: /base
+actionLink: /base/
 features:
 - title: 基础知识
   details: 书籍 + 博客 + 文档 + 个人理解

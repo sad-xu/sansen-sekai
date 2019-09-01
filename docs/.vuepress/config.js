@@ -5,7 +5,7 @@ module.exports = {
   configureWebpack: {
     resolve: {
       alias: {
-        '@alias': '/'
+        '@': './public/'
       }
     }
   },
@@ -22,9 +22,19 @@ module.exports = {
         '',
       ],
       '/algorithm/': [
-        ''
+        '',
+        {
+          title: '链表',
+          children: [
+            'linked-list/003.从头到尾打印链表'
+          ]
+        }
       ],
       '/weekly/': [
+        '',
+        '2019-08-30'
+      ],
+      '/': [
         ''
       ]
     }
