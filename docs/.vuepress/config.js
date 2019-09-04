@@ -27,7 +27,8 @@ module.exports = {
           title: '链表',
           children: [
             'linked-list/003.从头到尾打印链表',
-            'linked-list/014.链表中倒数第k个结点'
+            'linked-list/014.链表中倒数第k个结点',
+            'linked-list/015.反转链表'
           ]
         }
       ],
