@@ -29,7 +29,9 @@ module.exports = {
             'linked-list/003.从头到尾打印链表',
             'linked-list/014.链表中倒数第k个结点',
             'linked-list/015.反转链表',
-            'linked-list/016.合并两个或k个有序链表'
+            'linked-list/016.合并两个或k个有序链表',
+            'linked-list/025.复杂链表的复制',
+            'linked-list/036.两个链表的第一个公共结点'
           ]
         }
       ],
