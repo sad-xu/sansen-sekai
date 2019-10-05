@@ -35,6 +35,15 @@ module.exports = {
             'linked-list/055.链表中环的入口结点',
             'linked-list/056.删除链表中重复的结点'
           ]
+        }, {
+          title: '栈和队列',
+          children: [
+            'stack-queen/005.用两个栈实现队列',
+            'stack-queen/020.包含min函数的栈',
+            'stack-queen/021.栈的压入、弹出序列',
+            'stack-queen/044.翻转单词顺序列(栈)',
+            'stack-queen/064.滑动窗口的最大值(双端队列)'
+          ]
         }
       ],
       '/weekly/': [
