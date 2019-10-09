@@ -56,6 +56,27 @@ module.exports = {
             'stack-queen/044-翻转单词顺序列(栈)',
             'stack-queen/064-滑动窗口的最大值(双端队列)'
           ]
+        }, {
+          title: '堆',
+          children: [
+            'heap/029-最小的K个数'
+          ]
+        }, {
+          title: '哈希表',
+          children: [
+            'hash/034-第一个只出现一次的字符'
+          ]
+        }, {
+          title: '图',
+          children: [
+            '065-矩阵中的路径(BFS)',
+            '066-机器人的运动范围(DFS)'
+          ]
+        }, {
+          title: 'others',
+          children: [
+            '007-斐波那契数列'
+          ]
         }
       ],
       '/': [
