@@ -4,9 +4,9 @@
 
 大部分都是正常的组件使用方法，如`<el-button></el-button>`，和项目中的组件没什么区别
 
-一些是`命令式`调用的方式，如消息提示`this.$message({...})`
+有一些是`命令式`调用的方式，如消息提示`this.$message({...})`
 
-一个`声明式`调用，局部加载`v-loading`
+还有一个`声明式`调用，如局部加载`v-loading`
 
 ### 命令式
 
@@ -29,7 +29,7 @@ setTimeout(() => {
 }, 3000)
 ```
 
-分析：命令执行时，初始化组件，挂载根节点，根据传入参数渲染页面并返回实例，定时或手动执行实例的`hide`方法隐藏组件，最后销毁组件
+分析：命令执行时，初始化组件，挂载根节点，根据传入参数渲染页面并返回实例，定时或手动执行实例的`hide`方法后隐藏组件，最后销毁组件
 
 先写一个`.vue`文件
 
@@ -55,7 +55,7 @@ export defult {
 const Message = function({msg} = {}) {
   const instance = new MessageConstructor({
     data: {
-      msg // 提示信息
+      msg
     }
   })
   instance.$mount()
@@ -64,7 +64,7 @@ const Message = function({msg} = {}) {
 }
 ```
 
-如何隐藏后销毁组件
+如何在隐藏后销毁组件
 
 在组件里用`transition`包裹，隐藏时触发`after-leave`事件，手动销毁
 ```js
@@ -74,10 +74,66 @@ this.$destory()
 this.$el.parentNode.removeChild(this.$el)
 ```
 
-如何处理同时存在多个的情况
+### 声明式
 
-维护一个实例数组
+以全局指令的形式，`v-loading="isLoading"`
 
+`loading`只初始化一次，之后的切换通过`v-show`切换，绑定组件卸载时销毁节点
 
+`true`时会在声明的当前组件上覆盖一层mask，并显示加载状态，`false`时即隐藏
 
+还是先写一个`loading.vue`文件，主要是loading样式，再加一个`visible`变量控制显隐
 
+在再外面`index.js`里
+```js
+const LoadingConstrructor = Vue.extend(require('./Loading.vue').default)
+
+// 切换loading
+function toggleLoading(el. loading) {
+  if (binding.value) {
+    // 子节点为`absolute`,需要相对父节点定位
+    if (el.style.position !== 'absolute') {
+      el.style.position = 'relative'
+    }
+    // 插入节点，设置标志位
+    el.appendChild(el.loading)
+    el.instance.visible = true
+    el.domInserted = true
+  } else {
+    el.instance.visible = false
+  }
+}
+
+// 以插件的形式安装，自定义指令
+export default {
+  install: Vue => {
+    Vue.directive('loading', {
+      // 初始化
+      bind: (el, binding) => {
+        const instance = new LoadingConstructor({
+          el: document.createElement
+        })
+        el.instance = instance
+        el.loading = instance.$el
+        toggleLoading(el, binding)
+      },
+      // 绑定值变化
+      update: (el, binding) => {
+        if (binding.oldValue !== binding.value) {
+          toggleLoading(el, binding)
+        }
+      },
+      // 卸载节点
+      unbind: (el, binding) => {
+        if (el.domInserted) {
+          el.loading && 
+          el.loading.parentNode &&
+          el.loading.parentNode.removeChild(el.loading)
+        }
+      }
+    })
+  }
+}
+```
+
+以上只实现了局部loading，还可增加loading图标、文字选项，以及是否全屏loading选项，全屏loading还可提供命令式调用的形式
