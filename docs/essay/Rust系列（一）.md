@@ -232,4 +232,167 @@ fn main() {
 
 ---
 
-## 所有权
+## 所有权 ownership
+
+栈 stack：后进先出，类似js里基本类型存放的位置
+
+堆 Heap：类似js里Object类型存放的位置，在堆上分配内存，返回指针
+
+**目的**：
+
+管理堆数据。跟踪哪部分代码正在使用堆上的哪些数据，最大限度的减少堆上的重复数据的数量，以及清理堆上不再使用的数据确保不会耗尽空间
+
+**规则**：
+
+1. Rust 中的每一个值都有一个被称为其 所有者（owner）的变量
+
+2. 值有且只有一个所有者
+
+3. 当所有者（变量）离开作用域，这个值将被丢弃
+
+`char`类型，大小确定，且不可变，编译时内容确定，文本被硬编码进最终的可执行文件中；
+
+`String`类型，可变的，不确定的文本片段，需要在堆上分配一块在编译时大小未知的内存，即
+
+* 在运行时箱操作系统请求内存 `String::from`
+* 需要一个处理完`String`时将内存返回给操作系统的方法
+
+    1. 垃圾回收，自动回收，开发者无需关心
+    2. 手动回收
+    3. 在变量离开作用域后自动释放内存
+
+```rs
+{
+    let s = String::from("hello"); // 从此处起，s 是有效的
+    // 使用 s
+}   // 此作用域已结束，自动调`drop`方法释放内存
+    // s 不再有效
+```
+
+### 变量与数据的交互
+
+`RAII(Resource Acquisition Is Initialization)`资源获取即初始化：C++中在生命周期结束时释放资源的模式
+
+在复杂场景下的行为
+
+#### 移动
+
+类似js里对引用类型的复制，其实是对指针的操作，即浅拷贝
+
+```rs
+let s1 = String::from("hello");
+let s2 = s1; // move移动，浅拷贝的同时使`s1`无效，内存的释放只看s2
+```
+
+#### 克隆
+
+深复制
+
+```rs
+let s1 = String::from("hello");
+let s2 = s1.clone();
+```
+
+存储在栈上的类型有一个叫做`Copy trait`的特殊注解，在将其赋值给其他变量后仍然可用
+
+#### 所有权与函数
+
+```rs
+fn main() {
+    let s = String::from("hello");  // s 进入作用域
+    takes_ownership(s); // s 的值移动到函数里
+    // s到这里不再有效
+    let x = 5;  // x 进入作用域
+    makes_copy(x);  // x 应该移动函数里，
+    // 但 i32 是 Copy 的，所以在后面可继续使用 x
+} // x 先移出了作用域，然后是 s。但因为 s 的值已被移走，所以不会有特殊操作
+
+fn takes_ownership(some_string: String) { // some_string 进入作用域
+    println!("{}", some_string);
+} // some_string 移出作用域并调用 `drop` 方法。占用的内存被释放
+
+fn makes_copy(some_integer: i32) { // some_integer 进入作用域
+    println!("{}", some_integer);
+} // some_integer 移出作用域。不会有特殊操作
+```
+
+#### 返回值与作用域
+
+函数的返回值也可以转移所有权
+
+```rs
+fn main() {
+    let s1 = gives_ownership(); // gives_ownership 将返回值移给 s1
+    let s2 = String::from("hello"); // s2 进入作用域
+    let s3 = takes_and_gives_back(s2);  // s2 被移动到takes_and_gives_back 中, 它也将返回值移给 s3
+} // s3 移出作用域并被丢弃。s2 也移出作用域，但已被移走，所以什么也不会发生。s1 移出作用域并被丢弃
+
+fn gives_ownership() -> String { // gives_ownership 将返回值移动给
+    let some_string = String::from("hello"); // some_string 进入作用域.
+    some_string // 返回 some_string 并移出给调用的函数
+}
+
+// takes_and_gives_back 将传入字符串并返回该值
+fn takes_and_gives_back(a_string: String) -> String { // a_string 进入作用域
+    a_string  // 返回 a_string 并移出给调用的函数
+}
+```
+
+需求：函数使用一个值，但不想获取所有权，因为后面还要用，同时还需要函数返回一些其他值
+
+### 引用 &
+
+`&` 引用的值默认禁止修改
+
+```rs
+// $s1 -> s1 -> 堆内存
+fn main() {
+    let s1 = String::from("hello");
+    let len = calculate_length(&s1);
+    println!("The length of '{}' is {}.", s1, len);
+}
+
+fn calculate_length(s: &String) -> usize {
+    s.len()
+}
+```
+
+**可变引用**：`&mut`
+
+特定作用域中的特定数据有且只有一个可变引用，防止*数据竞争*
+
+一个引用的作用域从声明的地方开始一直持续到最后一次使用为止
+
+```rs
+let mut s = String::from("hello");
+
+let r1 = &s;
+let r2 = &s;
+println!("{} and {}", r1, r2);
+// r1 和 r2 最后一次使用，作用域结束
+
+let r3 = &mut s; // 作用域没有重叠，可声明可变引用
+println!("{}", r3);
+```
+
+**悬垂指针（dangling pointer）**：其指向的内存被分配给其它持有者
+
+```rs
+fn dangle() -> &String {
+    let s = String::from("hello");
+    &s // 返回字符串 s 的引用
+} // 这里 s 离开作用域并被丢弃。其内存被释放，&s为悬垂指针，此时应直接返回s，移出所有权，使s不被释放
+```
+
+### slice
+
+**slice**：没有所有权的类型，是`String`中一部分值的引用
+
+```rs
+let s = String::from("hello world");
+let hello = &s[0..5];   // [0, 5)
+let hello = &s[...5];   // [0, 5)
+let world = &s[6..=10]; // [6, 10]
+```
+
+## 结构体 struct
