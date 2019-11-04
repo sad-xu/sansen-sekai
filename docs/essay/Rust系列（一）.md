@@ -396,3 +396,40 @@ let world = &s[6..=10]; // [6, 10]
 ```
 
 ## 结构体 struct
+
+```rs
+struct User {
+    username: String,
+    email: String,
+    sign_in_count: u64,
+    active: bool,
+}
+```
+
+**元祖结构体**：无字段名，只有字段类型 例`struct Color(i32, i32, i32);`
+
+**类单元结构体**：没有任何字段的结构体
+
+结构体无法直接通过`println!`打印出来，因为结构体没有`Display`实现，需要通过`{:?}`或`{:#?}`,还需要在结构体定义前显示声明`#[derive(Debug)]`
+
+### 方法
+
+定义在结构体、枚举或 trait 对象的上下文中的函数，第一个参数始终是`self`，即实例
+
+方法定义在`impl`块内
+
+**关联函数**：`impl`块内不以`slef`作为参数的函数，常被用作返回一个结构体新实例的构造函数，通过`::`调用
+
+```rs
+impl Rectangle {
+    // 创建正方形
+    fn square(size: u32) -> Rectangle {
+        Rectangle { width: size, height: size }
+    }
+}
+let sq = Rectangle::square(3);
+```
+
+结构体与方法有点类似js里的类和原型，结构体类似构造函数，方法类似原型链里的方法
+
+## 枚举 enums
