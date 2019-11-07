@@ -433,3 +433,68 @@ let sq = Rectangle::square(3);
 结构体与方法有点类似js里的类和原型，结构体类似构造函数，方法类似原型链里的方法
 
 ## 枚举 enums
+
+```rs
+enum IpAddrKind {
+    V4(u8, u8, u8, u8),
+    V6(String)
+}
+impl InAddrKinf {
+    fn my_fn(&self) {
+        // 定义方法
+    }
+}
+// IpAddrKind::V4(127, 0, 0, 0, 1)
+```
+
+### Option 枚举
+
+避免空值
+
+```rs
+enum Option<T> {
+    Some(T),
+    None
+}
+```
+
+### match 控制流运算符
+
+功能上类似`switch case`
+
+```rs
+// 硬币分类
+enum Coin {
+    Penny,
+    Nickel,
+    Dime,
+    Quarter
+}
+
+fn value_in_cents(coin: Coin) -> u32 {
+    match coin {
+        Coin::Penny => 1,
+        Coin::Nickel => 5,
+        Coin::Dime => 10,
+        Coin::Quarter => 25
+    }
+}
+```
+
+### `if let` 语法糖
+
+当分支小于两个时，类似`switch`转成`if else`
+
+```rs
+let some_u8_value = Some(0u8);
+match some_u8_value {
+    Some(3) => println!("three"),
+    _ => (),
+}
+// 简写
+if let Some(3) = some_u8_value {
+    println!("three");
+} else {
+    // ...
+}
+```
