@@ -16,9 +16,18 @@
 
 ```html
 <svg class="svg-icon" aria-hidden="true">
-  <use :href="iconName"></use>
+  <use :xlink:href="iconName"></use>
 </svg>
 ```
+
+这里需要注意把`xlink:href`写成`href`也是可以的
+
+`SVG element: a: xlink:href` iOS >= 3.2  Android >= 3
+
+`SVG element: a: href` iOS >= 9  Android >= 5
+
+但是后者的兼容性不好，在低版本设备不会显示图标，注意别踩坑
+
 
 在内部组合成id，对应生成的实际id
 ```js
