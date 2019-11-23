@@ -156,6 +156,8 @@ export function exportHTMLToImg({
 
 `xlsx-style`用起来很麻烦，因为是基于很多年前的`xlsx`，许多方便的api不支持，这里就不写用法了
 
+### xlsx
+
 下面写一下`xlsx`的用法示例
 
 ```js
@@ -207,7 +209,122 @@ export function exportJSONToExcel({
 
 两者对比，前者十几个star，一年多没更新，开发者好像又弃坑了...后者4.7k个star，维护的很频繁，当然选第二个
 
-下面给出`exceljs`的使用示例
+### exceljs
+
+`exceljs`用起来有一点别扭，直接用的话设置样式很烦，最好手动封装一下，目前的导出需要的功能有加粗、边框、合并、水平垂直居中
+
+考虑把数据和样式分开，传入参数字段有
+
+```js
+function exportJSONToExcel({
+  name = Date.now(),
+  // 纯数据的二维数组，值为简单类型
+  data,
+  // 合并选项 三维数组，左上角起点+右下角终点
+  // [[[x1,y1], [x2, y2]],...]
+  merge = [],
+  // 加粗选项 二维数组 单元格位置
+  // [[x,y],...]
+  bold = []
+}) {}
+```
+
+先生成一个无样式的表
+
+```js
+// exportJSONToExcel
+let workbook = new Excel.Workbook()
+// 可添加一些额外信息 如作者、公司等
+workbook.creator = 'XHC' 
+// 新建sheet
+let sheet = workbook.addWorksheet('sheet-1')
+// 添加纯数据
+sheet.addRows(data)
+// 导出
+workbook.xlsx.writeBuffer()
+  .then(buffer => {
+    saveAs(new Blob([buffer]), `${name}.xlsx`)
+  })
+```
+
+so easy，纯数据的导出不论`xlsx`还是`exceljs`都很简单，接下来是给单元格附样式
+
+样式的操作在数据添加完成后，导出前，先做个加粗
+
+```js
+// exportJSONToExcel
+bold = bold.map(item => item.join('|'))
+// 遍历单元格
+data.forEach((rowData, r) => {
+  let row = sheet.getRow(r + 1)
+  rowData.forEach((cellData, c) => {
+    let cell = row.getCell(c + 1)
+    let rc = `${r}|${c}`
+    // 加粗
+    if (bold.length) {
+      let i = bold.findIndex(boldItem => boldItem === rc)
+      if (i >= 0) {
+        cell.font = {
+          bold: true
+        }
+        bold.splice(i, 1)
+      }
+    }
+  })
+})
+```
+
+辨别加粗单元格是通过把位置转化成字符串再比对的方法实现的，感觉还好
+
+然后是合并，合并是通过`worksheet.mergeCells('A4:B5')`实现的，所以需要一个数组下标转excel坐标`ABC`的方法
+
+```js
+function numToABC(num, str = '') {
+  let a = num % 26
+  let b = Math.floor(num / 26) - 1
+  str = String.fromCharCode(num + 65) + str
+  if (b === -1) return str
+  return numToABC(b, str)
+}
+```
+
+通过递归实现，需要注意的是数组是从0开始的，而excel是从1开始的
+
+```js
+// exportJSONToExcel
+// [[[x1,y1], [x2, y2]],...]
+let mergeContent = []
+merge.forEach(arr => {
+  mergeContent.push(arr[0])
+  sheet.mergeCells(`${numToABC(arr[0][1])}${arr[0][0] + 1}:${numToABC(arr[1][1])}${arr[1][0] + 1}`)
+})
+
+// 单元格遍历内部 和bold平级
+if (mergeContent) {
+  let i = mergeContent.findIndex(mergeItem => mergeItem === rc)
+  if (i >= 0) {
+    cell.alignment = {
+      vertial: 'middle',
+      horizontal: 'center'
+    }
+  }
+}
+```
+
+数组的xy与excel的xy是反的，需要注意一下
+
+还有，如果只是合并的话，里面的内容是不会水平垂直居中的，最好把内容放在左上角单元格里，在便利单元格时，附上居中，完美
+
+还有一个加边框的功能，先留着吧，大致思路是传参和merge类似，描述区域的数组，再加边框的颜色和形状字段，在遍历单元格的时候分辨四个边分别附上边框样式，OVER！
+
+本来计划周三写完的，谁能想到中途改成了`exceljs`实现，再加上其他杂七杂八的事情，拖到了周末。
+
+导出作为一个相对隐蔽的辅助功能，使用的人可能百分之一都不到，就算用，也没多少人在乎里面的样式是什么，有数据就行了。
+
+但我还是尽量做了，毕竟`html2canvas`、`xlsx`、`xlsx-style`、`excel`，维护这些库的开发者们至少上百人，跨度有好几年
+
+
+
 
 
 
