@@ -1,6 +1,6 @@
 # 一个简单的CSS动画和一个想法
 
-首先给大家安利一个网站`https://yui540.graphics`，整个演出全部由CSS实现，非常的厉害，作者是一位日本的CSS大佬`yui540`
+先给大家安利一个网站`https://yui540.graphics`，所有演出全部由CSS实现，作者是一位日本的CSS大佬`yui540`
 
 本文的css动画部分源自他的一篇文章`https://yuki540.hatenablog.jp/entry/2018/05/03/ニートに学ぶCSS_Animation演出講座_4時間目`
 
@@ -20,12 +20,13 @@ e: 右上角出现一个由八个正方形围成的圆，正方形边旋转同�
 
 ### dom结构
 
-有一个静a和四个动b-e，其中b和其他不一样，它只是一个圆
-所以可以把a和b合并
+有一个静a和四个动b-e，其中b和其他不一样，只是一个圆
+所以可以把a和b放在一起
+bcd里面分别有8个子元素
 
 ```html
 <div class="stage">
-  <!-- a3 -->
+  <!-- b -->
   <div class="effect effect-type-1">
     <div></div>
     <div></div>
@@ -36,26 +37,16 @@ e: 右上角出现一个由八个正方形围成的圆，正方形边旋转同�
     <div></div>
     <div></div>
   </div>
-  <!-- a4 -->
+  <!-- c -->
   <div class="effect effect-type-2">
     <div></div>
-    <div></div>
-    <div></div>
-    <div></div>
-    <div></div>
-    <div></div>
-    <div></div>
+    <!-- *8 -->
     <div></div>
   </div>
-  <!-- a5 -->
+  <!-- d -->
   <div class="effect effect-type-3">
     <div></div>
-    <div></div>
-    <div></div>
-    <div></div>
-    <div></div>
-    <div></div>
-    <div></div>
+    <!-- *8 -->
     <div></div>
   </div>
 </div>
@@ -68,38 +59,38 @@ e: 右上角出现一个由八个正方形围成的圆，正方形边旋转同�
 
 ```scss
 .stage {
-    position: fixed;
-    width: 100%;
-    height: 100%;
-    background-color: #D3C7C0;
-    // 边框
-    &:before {
-      content: '';
-      position: absolute;
-      top: 20px;
-      left: 20px;
-      width: calc(100% - 40px);
-      height: calc(100% - 40px);
-      border: dashed 5px #635256;
-      border-radius: 30px;
-      opacity: 0.3;
-    }
-    // b圆
-    &:after {
-      content: '';
-      position: absolute;
-      width: 400px;
-      height: 400px;
-      top: calc(50% - 200px);
-      left: calc(50% - 200px);
-      border-radius: 50%;
-      background-color: #635256;
-    }
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  background-color: #D3C7C0;
+  // 边框
+  &:before {
+    content: '';
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    width: calc(100% - 40px);
+    height: calc(100% - 40px);
+    border: dashed 5px #635256;
+    border-radius: 30px;
+    opacity: 0.3;
   }
+  // b圆
+  &:after {
+    content: '';
+    position: absolute;
+    width: 400px;
+    height: 400px;
+    top: calc(50% - 200px);
+    left: calc(50% - 200px);
+    border-radius: 50%;
+    background-color: #635256;
+  }
+}
 ```
 
 本文几乎所有的变化都会用`animation`实现
-圆先扩大后缩小，用到了`scale`
+圆先扩大后缩小，是`scale`缩放
 
 从第0秒开始，持续0.6s，结束后依然维持最后的状态，即缩小至0
 
@@ -119,7 +110,7 @@ e: 右上角出现一个由八个正方形围成的圆，正方形边旋转同�
 
 c、d、e这三个属于同一类，先写他们统一的样式
 
-作者在这里还是把实际形状放在了伪元素里
+作者在这里还是把实际形状在伪元素里绘制
 里面的八个`div`设为和外层一样大，只要旋转就能变成圆形分布
 
 ```scss
@@ -182,7 +173,7 @@ c、d、e这三个属于同一类，先写他们统一的样式
 
 `translateY`是都要有的，其次这些都不是一开始就出现的，所以在定义的时候就给透明，动画启动的时候再显示，`opacity`也是要有的
 
-c是整体旋转,d是局部旋转，需要`rotete`
+c是整体旋转,d是局部旋转，需要`rotate`
 
 ```scss
 .effect-type-1 div:after {
@@ -229,24 +220,24 @@ c是整体旋转,d是局部旋转，需要`rotete`
 
 这样大概就完成了
 
-动画有两个时间，`duration`和`delay`，为了保持整体动画的流畅，每个值都要算一下，就很烦
+动画有两个时间，`duration`和`delay`，每个动画的时间都很短，为了保持整体动画的流畅，每个值都要精确的算一下
 
-而且短短2s左右的动画，就要编写180行的代码，而且演出越长，代码还会越复杂，成本属实有些高
+短短2s左右的动画，就要编写180行的代码，而且演出越长，代码会越复杂，成本属实有些高了
 
-但是好看啊，`yui540`的`臆病な魔女`整个流程大概两分钟，一个开场加5个章节，演出紧凑还没有卡顿，视觉体验非常棒
+但是好看啊，`yui540`做的`臆病な魔女`一个开场加5个章节，整个流程大概两分钟，演出紧凑还没有卡顿，视觉体验非常棒
 
-看了一下源码，平均每个章节大概有800+行css代码，还不包括抽离出去的公共样式
+看了一下源码，平均每个章节大概有800+行css代码，还不包括抽离出去的公共样式，不愧是大佬
 
 ## js部分 - 一个想法
 
-在实现过一遍后，感觉css动画的编写和调试都有不友好，很原始，虽然现在有一些库可以简化，但都是通过js来实现的，代码混在就不纯粹了
+在实现过一遍后，感觉css动画的编写和调试都不太友好，很原始，虽然现在有一些库可以简化，但都是通过js来实现的，就不是纯粹的css了
 
-怎样简化这个流程，我不知道，但凭感觉写了点东西
+怎样简化这个流程，我不知道，就只凭感觉写了点东西
 
 最开始是这样想的
 
-1. 遍历动画所在的dom树，用`window.getComputedStyle(element, pseudoElt).getPropertyValue('animation')`拿到所有`animation`属性的值
-2. 根据`duration`和`delay`计算每个动画的具体时间，用定时器模拟同步动画，将动画名列表显示在页面上，表示当前正在执行的动画
+1. 遍历动画所在的dom树，用`window.getComputedStyle(element, pseudoElt).getPropertyValue('animation')`拿到所有有效的`animation`值
+2. 根据`duration`和`delay`计算出每个动画的具体时间，用定时器模拟，和动画同步，将当前正在执行的动画名列表显示在页面上
 
 关于定时器模拟，通过`setTimeout`和`promise`结合实现
 
@@ -285,9 +276,9 @@ list.forEach(item => {
 
 ```
 
-然而实现完后，突然想到有监听animation开始和结束的事件。。。
+然而实现完后，突然想到有监听animation开始和结束的事件。。。上面走了弯路了
 
-在最外层绑两个事件，开始加进去，结束移出去，同名的合并
+在最外层绑`animationstart`、`animationend`两个事件，开始加进去，结束移出去，同名的合并
 
 ```js
 /*
@@ -323,7 +314,10 @@ function animationEnd(e) {
 
 把列表显示到页面上，最后是这样
 
+能看到正在执行的动画名和数量，可以看到最后有一个动画`rotate360`执行了挺长时间的，因为作者设置了`4s`的`duration`，但由于透明度为0，很难发现这个点，某种程度上可以通过这种方式进行优化
 
-能看到正在执行的动画名和数量，还可以加上剩余时间，用个进度条什么的，不过好像也没啥用处
+还可以加上剩余时间，用个进度条什么的，甚至手动控制动画播放，就像做视频那样弄个时间线，就是不知道能不能实现罢了
 
+## 后记
 
+没有后记
