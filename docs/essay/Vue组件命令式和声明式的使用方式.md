@@ -69,7 +69,7 @@ const Message = function({msg} = {}) {
 
 ```js
 // 清理与其它实例的连接，解绑全部指令及事件监听器
-this.$destory()
+this.$destroy()
 // 删除自身节点
 this.$el.parentNode.removeChild(this.$el)
 ```
@@ -87,7 +87,7 @@ this.$el.parentNode.removeChild(this.$el)
 在再外面`index.js`里
 
 ```js
-const LoadingConstrructor = Vue.extend(require('./Loading.vue').default)
+const LoadingConstructor = Vue.extend(require('./Loading.vue').default)
 
 // 切换loading
 function toggleLoading(el, loading) {
