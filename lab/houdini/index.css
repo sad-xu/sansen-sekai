@@ -1,0 +1,14 @@
+
+
+.polygon {
+  width: 200px;
+  height: 200px;
+  -webkit-mask-image: paint(polygon);
+  --polygon-sides: 5;
+  --polygon-angle: 0deg;
+  font-size: 36px;
+  background-color: red;
+}
+/* .polygon:hover {
+  --avatar-sides: 8;
+} */
