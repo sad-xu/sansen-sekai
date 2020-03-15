@@ -1,5 +1,6 @@
 # codepen真实预览功能分析与拓展
 
+
 ## 说明
 
 首页有作品列表，可以预览每一个作品的内容
@@ -159,13 +160,141 @@ setTimeout(() => {
 
 ### setTimeout & setInterval 数秒后暂停
 
-```js
+重写`setTimeout`
 
+```js
+window.setTimeout = (function(oldSetTimeout) {
+  let registered = []
+  function f(a, b, push) {
+    if (this.timedOut && typeof push === 'undefined') return 0
+    if (push) return oldSetTimeout(a, b)
+    return registered[registered.length] = oldSetTimeout(a, b)
+  }
+  f.timedOut = false
+  f.clearAll = function() {
+    let r
+    while (r = registered.pop()) {
+      clearTimeout(r)
+    }
+    this.timedOut = true
+  }
+  return f  
+}(window.setTimeout))
 ```
 
-### getAnimations
+重写 `setInterval`
+
+```js
+window.setInterval = (function(oldSetInterval) {
+  let registered = []
+  function f(a, b) {
+    if (this.timedOut) return 0
+    return registered[registered.length] = oldSetInterval
+  }
+  f.timedOut = false
+  f.clearAll = function() {
+    let r
+    while (r = registered.pop()) {
+      clearInterval(r)
+    }
+    this.timedOut = true
+  }
+}(window.setInterval))
+```
+
+若干秒后清除所有计时器
+
+```js
+setTimeout(() => {
+  setTimeout.clearAll()
+  setInterval.clearAll()
+
+  // Web Animation API ???
+  if (
+    document.timeline && 
+    typeof document.timeline.getAnimations === 'function'
+  ) {
+    document.timeline.getAnimations().map(animation => {
+      animation.pause()
+    })
+  }
+}, __animationDuration, 'push')
+```
+
+### onload
+
+在 `body` 标签上加上 `onload` 事件
+当 `iframe` 页面加载完成后，会声明 `_l` 的全局变量
+
+```html
+<body onload="_l='t';"></body>
+```
+
+若2秒后还没有加载完成，则停止加载
+
+```js
+setTimeout(() => {
+  if (typeof _l === 'undefined') {
+    if (window.stop !== undefined) window.stop()
+    else if (document.execCommand !== undefined) document.execCommand('Stop', false)
+  }
+}, 2000, 'push')
+```
+
+### 停止所有正在进行的 CSS Animation
+
+动画开始时会触发 `animationstart`事件
+
+设置计时器，若干秒后无论动画有没有结束都给它暂停
+
+```js
+body.addEventListener('animationstart', e => {
+  if (e.type === 'animationstart') {
+    let tyarget = r.target
+    setTimeout(() => {
+      target.style.MozAnimationPlayState = 'paused'
+    }, __animationDuration, 'push')
+  }
+}, false)
+```
+
+### 暂停所有 auduo / video
+
+找到页面中的所有 `audio & video` 元素
+
+延时100毫秒再暂停是因为我也不知道
+
+Wait until the elements have been created to pause them
+
+```js
+function pauseElementTypes(type) {
+  for (let i = 0, els = document.getElementsByTagName(type); i < els.length; i++) {
+    els[i].pause()
+  }
+}
+
+setTimeout(() => {
+  pauseElementTypes('audio')
+  pauseElementTypes('video')
+}, 100)
+```
+
+## 后记
+
+原本是想把 `iframe` 替换成组件的形式实现的，可是上面修改了不少全局变量，会对主站有影响，也没有什么隔离组件全局变量的方案，就没做下去
+
+可如果你的作品是纯 `CSS` 的话，只停掉 `animation` 还是可以的，实现也简单不少
+
 
 ## 彩蛋
+
+```css
+  transform: scale(.5);
+  width: 200%;
+  height: 200%;
+  transform-origin: left top;
+```
+
 
 ```css
 @media (prefers-reduced-motion: reduce)
