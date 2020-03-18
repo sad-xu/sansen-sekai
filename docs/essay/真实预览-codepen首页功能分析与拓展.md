@@ -1,6 +1,5 @@
 # codepen真实预览功能分析与拓展
 
-
 ## 说明
 
 首页有作品列表，可以预览每一个作品的内容
@@ -72,7 +71,6 @@
 
 ## 实现
 
-
 ### 2. 禁用原生模态框
 
 模态框开启时，页面是无法响应的
@@ -112,10 +110,10 @@ if ('speak' in speechSynthesis) {
 禁用摄像头和麦克风
 
 ```js
-navigator.getUserMedia = function() {}
-navigator.mozGetUserMedia = function() {}
-navigator.webkitGetUserMedia = function() {}
-navigator.mediaDevices.getUserMedia = function() {}
+  navigator.getUserMedia = function() {}
+  navigator.mozGetUserMedia = function() {}
+  navigator.webkitGetUserMedia = function() {}
+  navigator.mediaDevices.getUserMedia = function() {}
 ```
 
 ### `requestAnimationFrame`数秒后暂停
@@ -284,7 +282,6 @@ setTimeout(() => {
 原本是想把 `iframe` 替换成组件的形式实现的，可是上面修改了不少全局变量，会对主站有影响，也没有什么隔离组件全局变量的方案，就没做下去
 
 可如果你的作品是纯 `CSS` 的话，只停掉 `animation` 还是可以的，实现也简单不少
-
 
 ## 彩蛋
 
